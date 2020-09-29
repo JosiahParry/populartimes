@@ -1,0 +1,15 @@
+Package: populartimes
+Title: Access Popular Times Data From Google Maps
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Josiah",
+           family = "Parry",
+           role = c("aut", "cre"),
+           email = "josiah.parry@gmail.com",
+           comment = c(ORCID = "0000-0001-9910-865X"))
+Description:populartimes provides an interface for accessing the popular times data provided from Google Maps. This package is a translation of the phenomenal python library of the same name. Popular times data is not supported by any official Google API. As such, it uses a combination of the Google Places API and web scraping. This is not currently supported by Google and is legally questionable. Please see issue # 90 (https://github.com/m-wrzr/populartimes/issues/90). 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
