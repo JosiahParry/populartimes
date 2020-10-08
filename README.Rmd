@@ -1,0 +1,77 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# populartimes
+
+<!-- badges: start -->
+
+<!-- badges: end -->
+
+populartimes is an R translation of the wonderful python [library](https://github.com/m-wrzr/populartimes) of the same name. This package is more limited in scope as it does not have a function or searching by spatial area. The package [googleway](https://github.com/SymbolixAU/googleway) does this already.
+
+## Installation
+
+You can install the deve;opment version of populartimes from with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("JosiahParry/populartimes")
+```
+
+There is a single function that is provided by this library: `get_popular_times()`. There are two arguments:
+
+-   `place_id`: The unique Google Maps identifier. See [docs](https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder) for app to provide place ID.
+-   Google API key from <https://console.cloud.google.com/>. Ensure Places API is enabled.
+
+The easiest way to utilize this is by setting the environment variable `GOOGLE_KEY` to your key value. For example `Sys.setenv("GOOGLE_KEY" = "your-key-value")` or by using an .Renviron file. You can get a key by following [these instructions](https://developers.google.com/places/web-service/get-api-key).
+
+## Example
+
+### Search and area for popular times
+
+```{r}
+library(populartimes)
+library(tidyverse)
+sw <- c(42.988690, -71.465834)
+ne <- c(42.995119, -71.455745)
+manch_bars <- search_pop_times(sw, ne, radius = 200, type = "bar")
+```
+
+```{r}
+manch_bars %>% 
+  filter(name == "Thirsty Moose Taphouse Manchester") %>% 
+  unnest(popular_times) %>% 
+  ggplot(aes(hour, popularity)) +
+  geom_col() + 
+  facet_wrap(c("day_of_week"), ncol = 1)
+  
+```
+
+### Search an area for places
+
+Note that `get_places()` does not implement a search grid. You are limited to the nearest 60 results regardless of radius. 
+
+```{r}
+get_places(ne, radius = 200)
+```
+
+#### Get popular times for a given place
+
+```{r}
+get_popular_times("ChIJywwlXCZP4okRQTupAgSLMSI") %>% 
+  select(name, popular_times)
+```
+
+
