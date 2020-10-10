@@ -8,10 +8,20 @@
 <!-- badges: end -->
 
 populartimes is an R translation of the wonderful python
-[library](https://github.com/m-wrzr/populartimes) of the same name. This
-package is more limited in scope as it does not have a function or
-searching by spatial area. The package
-[googleway](https://github.com/SymbolixAU/googleway) does this already.
+[library](https://github.com/m-wrzr/populartimes) of the same name.
+
+populartimes provides access to the Google Places nearby and detail API
+endpoints. It goes a step further and retrieves popular time data if
+available and requested.
+
+The use of the popular times data is questionable legally. Please see
+[issue \#90](https://github.com/m-wrzr/populartimes/issues/90) of the
+original library. Please be thoughtful with your use of this library and
+do not abuse it.
+
+Note that this library requires the use of a Google Places API. There is
+a limit on the number of free queries you can make. I believe this is
+1,000 in a single 24 hour period.
 
 ## Installation
 
@@ -41,6 +51,24 @@ instructions](https://developers.google.com/places/web-service/get-api-key).
 
 ### Search and area for popular times
 
+`search_pop_times()` works by creating a search grid of overlapping
+circles with a radius specified in meters by the `radius` argument
+(default of 180 meters). Each circle centroid is used to search the
+Google Places Nearby API and returns up to 60 results each. The denser
+the area, the smaller the radius should be. This also means that the
+smaller your search radius, the more API queries will be made. Be
+careful as you can be bulled for going over your limit\!
+
+There are two required arguments for `search_pop_times()`: `sw`, and
+`ne`. These are a numeric vector length two with the format of `c(lat,
+long)` indicating the southwest and northeastern corners of a bounding
+box. Please note that this must be in EPSG 4326 (aka decimal degrees).
+
+Optionally you can specify a type of place to search. If you do this,
+only one place can be searched for at a time. Please see the [API
+docs](https://developers.google.com/places/web-service/supported_types)
+for supported place types.
+
 ``` r
 library(populartimes)
 library(tidyverse)
@@ -51,6 +79,14 @@ ne <- c(42.995119, -71.455745)
 manch_bars <- search_pop_times(sw, ne, radius = 200, type = "bar")
 ```
 
+The popular times are stored in a list column where each value is a
+tibble. To access the popular times, you can unnest the column. See the
+below example for unnesting the popular times for a single bar. Be aware
+that popular times are provided in UTC time zone.
+
+Note: the Thirsty Moose has a great mimosa deal during brunch on the
+weekends.
+
 ``` r
 manch_bars %>% 
   filter(name == "Thirsty Moose Taphouse Manchester") %>% 
@@ -58,9 +94,18 @@ manch_bars %>%
   ggplot(aes(hour, popularity)) +
   geom_col() + 
   facet_wrap(c("day_of_week"), ncol = 1)
+  
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+You can access the centroids used in the centroid by grabbing the
+`search_grid` attribute of the resultant object—e.g. `attr(x,
+"search_grid")` will return a data frame containing the lat long.
+
+``` r
+attr(manch_bars, "search_grid") %>% 
+  ggplot(aes(lon, lat)) +
+  geom_point()
+```
 
 ### Search an area for places
 
@@ -69,21 +114,6 @@ limited to the nearest 60 results regardless of radius.
 
 ``` r
 get_places(ne, radius = 200)
-#> # A tibble: 60 x 11
-#>    place_id name    lat  long vicinity types rating n_ratings price_level
-#>    <chr>    <chr> <dbl> <dbl> <chr>    <lis>  <dbl>     <int>       <int>
-#>  1 ChIJo2x… Manc…  43.0 -71.5 Manches… <chr…   NA          NA          NA
-#>  2 ChIJaXa… Ash …  43.0 -71.5 118 Ash… <chr…    4.6        27          NA
-#>  3 ChIJRfg… La C…  43.0 -71.5 103 Wal… <chr…    4           1          NA
-#>  4 ChIJG2E… Grea…  43.0 -71.5 170 Low… <chr…    3           2          NA
-#>  5 ChIJ8zX… Clea…  43.0 -71.5 154 Bri… <chr…    4.2        12          NA
-#>  6 ChIJWaY… Ash …  43.0 -71.5 Manches… <chr…   NA          NA          NA
-#>  7 ChIJUej… Ligh…  43.0 -71.5 615 Uni… <chr…   NA          NA          NA
-#>  8 ChIJK-X… Unio…  43.0 -71.5 610 Uni… <chr…    3.7         3          NA
-#>  9 ChIJm0_… The …  43.0 -71.5 High St… <chr…   NA          NA          NA
-#> 10 ChIJVVV… Mich…  43.0 -71.5 587 Uni… <chr…    1           7          NA
-#> # … with 50 more rows, and 2 more variables: business_status <chr>,
-#> #   photos <list>
 ```
 
 #### Get popular times for a given place
@@ -91,8 +121,4 @@ get_places(ne, radius = 200)
 ``` r
 get_popular_times("ChIJywwlXCZP4okRQTupAgSLMSI") %>% 
   select(name, popular_times)
-#> # A tibble: 1 x 2
-#>   name                            popular_times     
-#>   <chr>                           <list>            
-#> 1 The Shaskeen Pub and Restaurant <tibble [133 × 3]>
 ```

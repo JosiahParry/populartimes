@@ -9,7 +9,8 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  out.width = "100%",
+  eval=FALSE
 )
 ```
 
@@ -19,7 +20,13 @@ knitr::opts_chunk$set(
 
 <!-- badges: end -->
 
-populartimes is an R translation of the wonderful python [library](https://github.com/m-wrzr/populartimes) of the same name. This package is more limited in scope as it does not have a function or searching by spatial area. The package [googleway](https://github.com/SymbolixAU/googleway) does this already.
+populartimes is an R translation of the wonderful python [library](https://github.com/m-wrzr/populartimes) of the same name.
+
+populartimes provides access to the Google Places nearby and detail API endpoints. It goes a step further and retrieves popular time data if available and requested.
+
+The use of the popular times data is questionable legally. Please see [issue \#90](https://github.com/m-wrzr/populartimes/issues/90) of the original library. Please be thoughtful with your use of this library and do not abuse it.
+
+Note that this library requires the use of a Google Places API. There is a limit on the number of free queries you can make. I believe this is 1,000 in a single 24 hour period.
 
 ## Installation
 
@@ -41,13 +48,25 @@ The easiest way to utilize this is by setting the environment variable `GOOGLE_K
 
 ### Search and area for popular times
 
+`search_pop_times()` works by creating a search grid of overlapping circles with a radius specified in meters by the `radius` argument (default of 180 meters). Each circle centroid is used to search the Google Places Nearby API and returns up to 60 results each. The denser the area, the smaller the radius should be. This also means that the smaller your search radius, the more API queries will be made. Be careful as you can be bulled for going over your limit!
+
+There are two required arguments for `search_pop_times()`: `sw`, and `ne`. These are a numeric vector length two with the format of `c(lat, long)` indicating the southwest and northeastern corners of a bounding box. Please note that this must be in EPSG 4326 (aka decimal degrees).
+
+Optionally you can specify a type of place to search. If you do this, only one place can be searched for at a time. Please see the [API docs](https://developers.google.com/places/web-service/supported_types) for supported place types.
+
 ```{r}
 library(populartimes)
 library(tidyverse)
+
 sw <- c(42.988690, -71.465834)
 ne <- c(42.995119, -71.455745)
+
 manch_bars <- search_pop_times(sw, ne, radius = 200, type = "bar")
 ```
+
+The popular times are stored in a list column where each value is a tibble. To access the popular times, you can unnest the column. See the below example for unnesting the popular times for a single bar. Be aware that popular times are provided in UTC time zone.
+
+Note: the Thirsty Moose has a great mimosa deal during brunch on the weekends.
 
 ```{r}
 manch_bars %>% 
@@ -59,9 +78,17 @@ manch_bars %>%
   
 ```
 
+You can access the centroids used in the centroid by grabbing the `search_grid` attribute of the resultant object—e.g. `attr(x, "search_grid")` will return a data frame containing the lat long.
+
+```{r}
+attr(manch_bars, "search_grid") %>% 
+  ggplot(aes(lon, lat)) +
+  geom_point()
+```
+
 ### Search an area for places
 
-Note that `get_places()` does not implement a search grid. You are limited to the nearest 60 results regardless of radius. 
+Note that `get_places()` does not implement a search grid. You are limited to the nearest 60 results regardless of radius.
 
 ```{r}
 get_places(ne, radius = 200)
@@ -73,5 +100,3 @@ get_places(ne, radius = 200)
 get_popular_times("ChIJywwlXCZP4okRQTupAgSLMSI") %>% 
   select(name, popular_times)
 ```
-
-
