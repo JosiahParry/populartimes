@@ -3,6 +3,7 @@
 export(get_place_details)
 export(get_places)
 export(get_popular_times)
+export(poptimes_from_address)
 export(search_pop_times)
 importFrom(dplyr,bind_cols)
 importFrom(dplyr,mutate)

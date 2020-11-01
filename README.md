@@ -25,21 +25,16 @@ a limit on the number of free queries you can make. I believe this is
 
 ## Installation
 
-You can install the deve;opment version of populartimes from with:
+You can install the development version of populartimes from with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("JosiahParry/populartimes")
+# install.packages("remotes")
+remotes::install_github("JosiahParry/populartimes")
 ```
 
-There is a single function that is provided by this library:
-`get_popular_times()`. There are two arguments:
-
-  - `place_id`: The unique Google Maps identifier. See
-    [docs](https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder)
-    for app to provide place ID.
-  - Google API key from <https://console.cloud.google.com/>. Ensure
-    Places API is enabled.
+In order to use the majority of the functionality of this package,
+ensure that you have a Google API key from
+<https://console.cloud.google.com/>. Ensure Places API is enabled.
 
 The easiest way to utilize this is by setting the environment variable
 `GOOGLE_KEY` to your key value. For example `Sys.setenv("GOOGLE_KEY" =
@@ -49,7 +44,7 @@ instructions](https://developers.google.com/places/web-service/get-api-key).
 
 ## Example
 
-### Search and area for popular times
+### Search an area for popular times
 
 `search_pop_times()` works by creating a search grid of overlapping
 circles with a radius specified in meters by the `radius` argument
@@ -107,9 +102,15 @@ attr(manch_bars, "search_grid") %>%
   geom_point()
 ```
 
+### Search for a place by name and address
+
+``` r
+poptimes_from_address("McDonald", "Helmstraat 16, 6211 TA Maastricht, Netherlands")
+```
+
 ### Search an area for places
 
-Note that `get_places()` does not implement a search grid. You are
+Note that `get_places()` does not implement a grid search. You are
 limited to the nearest 60 results regardless of radius.
 
 ``` r
