@@ -9,7 +9,7 @@ poptimes_from_address(place_name, address)
 \arguments{
 \item{place_name}{The name of the place.}
 
-\item{address}{A string containing the address of a place. Roughly as "<street address>, <city>, <region>, <postal code>, <country>". This field is flexible.}
+\item{address}{A string containing the address of a place. Roughly as "\if{html}{\out{<street address>}}, \if{html}{\out{<city>}}, \if{html}{\out{<region>}}, \if{html}{\out{<postal code>}}, \if{html}{\out{<country>}}". This field is flexible.}
 }
 \description{
 Search Google for popular times for a given point of interest's name and address. Google is smart, so the address component is not exceptionally strict. But do your best to format it!
