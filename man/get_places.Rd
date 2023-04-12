@@ -16,12 +16,11 @@ get_places(
 )
 
 text_search(
-  location = NULL,
-  type = NULL,
-  keyword = NULL,
+  location,
+  query,
   language = NULL,
-  rankby = NULL,
-  key = Sys.getenv("GOOGLE_KEY")
+  key = Sys.getenv("GOOGLE_KEY"),
+  ...
 )
 }
 \arguments{
@@ -32,6 +31,8 @@ text_search(
 \item{type}{A place type to limit the search to. See API \href{https://developers.google.com/places/web-service/supported_types}{docs} for valid place types. Only one type may be specified per search.}
 
 \item{key}{Your Google Places API key.}
+
+\item{query}{a text based query}
 }
 \description{
 Search for Google Places in a given area

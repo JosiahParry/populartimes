@@ -1,7 +1,7 @@
 #' @rdname get_places
 #' @export
-text_search <- function(location = NULL, type = NULL, 
-                       keyword = NULL, language = NULL, rankby = NULL, key = Sys.getenv("GOOGLE_KEY")) {
+#' @param query a text based query
+text_search <- function(location, query, language = NULL, key = Sys.getenv("GOOGLE_KEY"), ...) {
   
   res_list <- list()
   
